@@ -24,23 +24,36 @@ void Admin::DeleteInstance()
 
 void Admin::Admin_login()
 {
-	string Id = "";
-	string password = "";
-	cout << "请输入管理员姓名: "; cin >> Id;
-	cout << "请输入密码: "; cin >> password; cout << endl;
-	if (Id == m_id && password == m_password)
+	try
 	{
-		cout << endl
-			<< "    -----登录成功!------" << endl
-			<< endl;
-		AfterLogin();
+
+		string Id = "";
+		string password = "";
+		cout << "请输入管理员姓名: "; 
+		getline(cin, Id);
+		if (Id.find(" ") != string::npos) throw 1.0;
+		cout << "请输入密码: ";
+		getline(cin, password);
+		if (password.find(" ") != string::npos) throw 1.0;
+		cout << endl;
+		if (Id == m_id && password == m_password)
+		{
+			cout << endl
+				<< "    -----登录成功!------" << endl
+				<< endl;
+			AfterLogin();
+		}
+		else
+		{
+			cout << endl
+				<< "----账号或密码错误,登陆失败----" << endl
+				<< endl;
+			return;
+		}
 	}
-	else
+	catch (double)
 	{
-		cout << endl
-			<< "----账号或密码错误,登陆失败----" << endl
-			<< endl;
-		return;
+		cout << "请不要输入空格！" << endl << endl;
 	}
 }
 
@@ -54,7 +67,8 @@ void Admin::AfterLogin()
 			<< "请输入操作: ";
 		string in = "";
 		try {
-			cin >> in;
+			getline(cin, in);
+			if (in.find(" ") != string::npos) throw 1.0;
 			if (in.length() != 1)
 				throw 1;
 			if (in[0] < '1' || in[0]>'7')
@@ -87,6 +101,10 @@ void Admin::AfterLogin()
 		{
 			cout << "输入无效! 请重新正确输入!" << endl;
 		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+		}
 	}
 	return;
 }
@@ -105,49 +123,68 @@ string Admin::CheckGoods()
 
 string Admin::SearchGoods()
 {
-	cout << "请输入商品名称: ";
-	string in = "";
-	cin >> in;
-	return "SELECT * FROM commodity WHERE commodityName CONTAINS " + in;
+	try
+	{
+		cout << "请输入商品名称: ";
+		string in = "";
+		getline(cin, in);
+		if (in.find(" ") != string::npos) throw 1.0;
+		return "SELECT * FROM commodity WHERE commodityName CONTAINS " + in;
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl << endl;
+	}
+	return"";
 }
 
 string Admin::DisableGood()
 {
-	cout << "请输入要下架的商品ID: ";
-	string in = "";
-	cin >> in;
-	Goods* allgood = Goods::GetInstance();
-	if (allgood->CheckGoodId(in))
+	try
 	{
-		cout << "确认要下架该商品吗?" << endl;
-		allgood->PrintGoods("Admin", "Last", "", in);
-		cout << "请选择(y/n):";
-		string in2 = "";
-		cin >> in2;
-		try
+		cout << "请输入要下架的商品ID: ";
+		string in = "";
+		getline(cin, in);
+		if (in.find(" ") != string::npos) throw 1.0;
+		Goods* allgood = Goods::GetInstance();
+		if (allgood->CheckGoodId(in))
 		{
-			if (in2 == "y")
+			cout << "确认要下架该商品吗?" << endl;
+			allgood->PrintGoods("Admin", "Last", "", in);
+			cout << "请选择(y/n):";
+			string in2 = "";
+			getline(cin, in2);
+			if (in2.find(" ") != string::npos) throw 1.0;
+			try
 			{
-				return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + in2;
+				if (in2 == "y")
+				{
+					return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + in2;
+				}
+				if (in2 == "n")
+				{
+					cout << "取消下架" << endl << endl;
+					return "";
+				}
+				else
+					throw 1;
 			}
-			if (in2 == "n")
+			catch (int)
 			{
-				cout << "取消下架" << endl << endl;
+				cout << "输入不合法,下架取消!" << endl << endl;
 				return "";
 			}
-			else
-				throw 1;
 		}
-		catch (int)
+		else
 		{
-			cout << "输入不合法,下架取消!" << endl << endl;
+			cout << "商品ID不存在,下架失败" << endl;
 			return "";
 		}
 	}
-	else
+	catch (double)
 	{
-		cout << "商品ID不存在,下架失败" << endl;
-		return "";
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
 }
 
@@ -165,47 +202,57 @@ string Admin::DisableUser()
 {
 	cout << "请输入要封禁的用户ID: ";
 	string in = "";
-	cin >> in;
-	Users* alluser = Users::GetInstance();
-	if (alluser->CheckUserId(in))
+	try
 	{
-		if (alluser->GetUserState(in) == "inactive")
+		getline(cin, in);
+		if (in.find(" ") != string::npos) throw 1.0;
+		Users* alluser = Users::GetInstance();
+		if (alluser->CheckUserId(in))
 		{
-			cout << "用户已被封禁" << endl << endl;
-			return "";
-		}
-		cout << "确认要封禁该用户吗?" << endl;
-		cout << "*************************************************************************" << endl
-			<< "用户ID\t\t用户名\t\t联系方式\t\t\t地址\t\t\t钱包余额" << endl;
-		alluser->PrintUser("AdminDisable", in);
-		cout << "*************************************************************************" << endl;
-		cout << "请选择(y/n): ";
-		string in2 = "";
-		cin >> in2;
-		try
-		{
-			if (in2 == "y")
+			if (alluser->GetUserState(in) == "inactive")
 			{
-				return "UPDATE user SET state = inactive WHERE sellerID CONTAINS " + in;
-			}
-			if (in2 == "n")
-			{
-				cout << "取消封禁" << endl << endl;
+				cout << "用户已被封禁" << endl << endl;
 				return "";
 			}
-			else
-				throw 1;
+			cout << "确认要封禁该用户吗?" << endl;
+			cout << "*************************************************************************" << endl
+				<< "用户ID\t\t用户名\t\t联系方式\t\t\t地址\t\t\t钱包余额" << endl;
+			alluser->PrintUser("AdminDisable", in);
+			cout << "*************************************************************************" << endl;
+			cout << "请选择(y/n): ";
+			string in2 = "";
+			getline(cin, in2);
+			if (in2.find(" ") != string::npos) throw 1.0;
+			try
+			{
+				if (in2 == "y")
+				{
+					return "UPDATE user SET state = inactive WHERE sellerID CONTAINS " + in;
+				}
+				if (in2 == "n")
+				{
+					cout << "取消封禁" << endl << endl;
+					return "";
+				}
+				else
+					throw 1;
+			}
+			catch (int)
+			{
+				cout << "输入不合法,封禁取消!" << endl << endl;
+				return "";
+			}
 		}
-		catch (int)
+		else
 		{
-			cout << "输入不合法,封禁取消!" << endl << endl;
+			cout << "用户ID不存在,封禁失败" << endl << endl;
 			return "";
 		}
 	}
-	else
+	catch (double)
 	{
-		cout << "用户ID不存在,封禁失败" << endl <<endl;
-		return "";
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
 }
 
@@ -288,9 +335,25 @@ User::User(string Id, string name, string password, string phone, string address
 	_PhoneNumber = phone;
 	_Address = address;
 	_UserState = state;
-	_Money = stod(balance);
+	if (balance.empty()) { _Money = 0.0; }
+	else { _Money = stod(balance); };
 }
 
+
+User& User::operator=(const User& other)
+{
+	if (&other != this)
+	{
+		_UserId = other._UserId;
+		_UserName = other._UserName;
+		_Password = other._Password;
+		_PhoneNumber = other._PhoneNumber;
+		_Address = other._Address;
+		_UserState = other._UserState;
+		_Money = other._Money;
+	}
+	return *this;
+}
 //小型函数
 string User::GetUserState()
 {
@@ -348,13 +411,11 @@ void User::PrintUserAdmin()
 }
 void User::PrintUserSelf()
 {
-	string ke = to_string(_Money);
-	ke.erase(ke.end() - 5, ke.end());
 	cout << "***************************" << endl
 		<< "用户名： " << _UserName << endl
 		<< "联系方式： " << _PhoneNumber << endl
 		<< "地址： " << _Address << endl
-		<< "钱包余额： " << ke << endl
+		<< "钱包余额： " <<GetMoney() << endl
 		<< "***************************" << endl<<endl;
 	return;
 }
@@ -616,7 +677,8 @@ void Users::InputDocuUser()
 		}
 		Unit.push_back(tmp);
 		tmp.clear();
-		AllUsers[Unit[0]] = User(Unit[0], Unit[1], Unit[2], Unit[3], Unit[4], Unit[5], Unit[6]);
+		User A(Unit[0], Unit[1], Unit[2], Unit[3], Unit[4], Unit[5], Unit[6]);
+		AllUsers[Unit[0]] = A;
 		Unit.clear();
 	}
 	if (in_file.eof())
@@ -679,45 +741,63 @@ int Users::GetAll()
 }
 void Users::AddUser()
 {
-	string UserId = "";
-	string Pass = "";
-	cout << "请输入用户名： "; cin >> UserId;
-	cout << "请输入密码： "; cin >> Pass;
-	if (CheckUserName(UserId))
+	try
 	{
-		cout << "----用户名已存在，退出注册----" << endl << endl;
-		return;
+		string UserId = "";
+		string Pass = "";
+		cout << "请输入用户名： ";
+		getline(cin, UserId);
+		if (UserId.find(" ") != string::npos) throw 1.0;
+		cout << "请输入密码： "; 
+		getline(cin, Pass);
+		if (Pass.find(" ") != string::npos) throw 1.0;
+		if (CheckUserName(UserId))
+		{
+			cout << "----用户名已存在，退出注册----" << endl << endl;
+			return;
+		}
+		else
+		{
+			string ke = "U" + to_string(GetAll());
+			AllUsers[ke] = User(ke, UserId, Pass);
+			ResetDocuUser();
+			cout << "-----注册成功,若继续操作请登录----" << endl << endl;
+			return;
+		}
 	}
-	else
+	catch (double)
 	{
-		string ke = "U" + to_string(GetAll());
-		AllUsers[ke] = User(ke, UserId, Pass);
-		ResetDocuUser();
-		cout << "-----注册成功,若继续操作请登录----" << endl << endl;
+		cout << "请不要输入空格！" << endl << endl;
 		return;
 	}
 }
 
 void Users::UserLogin()
 {
-	string UserId = "";
-	string Pass = "";
-	cout << "请输入用户名： "; cin >> UserId;
-	cout << "请输入密码： "; cin >> Pass;
-	if (!CheckUserName(UserId))
+	try
 	{
-		cout << "----用户不存在！----" << endl <<endl;
-		_CurrUser = nullptr;
-		return;
-	}
-	else
-	{
-		_CurrUser = &AllUsers[GetUserId(UserId)];
-		if (_CurrUser->GetUserState() == "inactive")
+		string UserId = "";
+		string Pass = "";
+		cout << "请输入用户名： ";
+		getline(cin, UserId);
+		if (UserId.find(" ") != string::npos) throw 1.0;
+		cout << "请输入密码： "; 
+		getline(cin, Pass);
+		if (Pass.find(" ") != string::npos) throw 1.0;
+		if (!CheckUserName(UserId))
 		{
-			cout << "您已被封禁！" << endl << endl;
+			cout << "----用户不存在！----" << endl << endl;
+			_CurrUser = nullptr;
 			return;
 		}
+		else
+		{
+			_CurrUser = &AllUsers[GetUserId(UserId)];
+			if (_CurrUser->GetUserState() == "inactive")
+			{
+				cout << "您已被封禁！" << endl << endl;
+				return;
+			}
 			if (_CurrUser->CheckPass(Pass))
 			{
 				cout << "----登录成功！----" << endl << endl;
@@ -726,9 +806,15 @@ void Users::UserLogin()
 			}
 			else
 			{
-				cout << "----密码错误！请重新登录！----" << endl<<endl;
+				cout << "----密码错误！请重新登录！----" << endl << endl;
 				return;
 			}
+		}
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl << endl;
+		return;
 	}
 }
 bool Users::CheckUserId(string Id)
@@ -810,9 +896,11 @@ void Users::AfterLogin()
 			<< "1.我是买家  2.我是卖家  3.个人信息管理 4.注销登录" << endl
 			<< "=================================================" << endl << endl;
 		string in = "";
-		cout << "请输入操作： "; cin >> in;
+		cout << "请输入操作： ";
+		getline(cin,in);
 		try
 		{
+			if (in.find(" ") != string::npos) throw 1.0;
 			if (in.length() != 1)
 			{
 				throw 1;
@@ -842,6 +930,12 @@ void Users::AfterLogin()
 		catch (int)
 		{
 			cout << "Invalid Input!" << endl<<endl;
+			return;
+		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+			return;
 		}
 	}
 }
@@ -860,9 +954,11 @@ void Users::UserSeller()
 			<< "1.发布商品 2.查看发布商品 3.修改商品信息 4.下架商品 5.查看历史订单 6.返回用户主界面" << endl
 			<< "===========================================================================" << endl << endl;
 		string in = "";
-		cout << "请输入操作： "; cin >> in;
+		cout << "请输入操作： "; 
+		getline(cin, in);
 		try
 		{
+			if (in.find(" ") != string::npos) throw 1.0;
 			if (in.length() != 1)
 			{
 				throw 1;
@@ -898,6 +994,12 @@ void Users::UserSeller()
 		catch (int)
 		{
 			cout << "Invalid Input!" << endl << endl;
+			return;
+		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+			return;
 		}
 	}
 	return;
@@ -905,59 +1007,74 @@ void Users::UserSeller()
 
 string Users::AddGood()
 {
-	string GoodName = "",Price="",Stock="",Descrip="";
-	cout << "请输入商品名称： "; cin >> GoodName;
-	cout << "请输入商品价格： "; cin >> Price;
-	cout << "请输入商品数量： "; cin >> Stock;
-	cout << "请输入商品描述： "; cin >> Descrip;
-	string::iterator it;
-	it = Price.begin();
-	if (GoodName.length() > 20)
-	{
-		cout << "---输入名称过长，请少于21个字符---" << endl << endl;
-		return "";
-	}
 	try
 	{
-		if (Price[0] < '0' || Price[0]>'9') throw 1;
-		if (Price[0] == '0' && (Price[1] != '.')) throw 1;
-		for (int i = 1; i <Price.length(); i++)
+		string GoodName = "", Price = "", Stock = "", Descrip = "";
+		cout << "请输入商品名称： ";
+		getline(cin, GoodName);
+		if (GoodName.find(" ") != string::npos) throw 1.0;
+		cout << "请输入商品价格： ";
+		getline(cin, Price);
+		if (Price.find(" ") != string::npos) throw 1.0;
+		cout << "请输入商品数量： ";
+		getline(cin, Stock);
+		if (Stock.find(" ") != string::npos) throw 1.0;
+		cout << "请输入商品描述： "; 
+		getline(cin, Descrip);
+		string::iterator it;
+		it = Price.begin();
+		if (GoodName.length() > 20)
 		{
-			if (Price[i] < '0' || Price[i]>'9')
+			cout << "---输入名称过长，请少于21个字符---" << endl << endl;
+			return "";
+		}
+		try
+		{
+			if (Price[0] < '0' || Price[0]>'9') throw 1;
+			if (Price[0] == '0' && (Price[1] != '.')) throw 1;
+			for (int i = 1; i < Price.length(); i++)
 			{
-				if (Price[i] == '.')
+				if (Price[i] < '0' || Price[i]>'9')
 				{
-					if (i == Price.length() - 2 && (Price[i+1] >= '0' || Price[i+1] <= '9'))
+					if (Price[i] == '.')
 					{
-						break;
+						if (i == Price.length() - 2 && (Price[i + 1] >= '0' || Price[i + 1] <= '9'))
+						{
+							break;
+						}
+						else throw 1;
 					}
 					else throw 1;
 				}
-				else throw 1;
 			}
 		}
-	}
-	catch (int)
-	{
-		cout << "---价格格式不正确，已退出发布，正确发布请输入一位小数或整数---" << endl << endl;
-		return "";
-	}
-	try
-	{
-		if (Stock[0] < '1' || Stock[0]>'9') throw 1;
-		for (int i = 1; i < Stock.length(); i++)
+		catch (int)
 		{
-			if (Stock[i] < '0' || Stock[i]>'9')
-				throw 1;
+			cout << "---价格格式不正确，已退出发布，正确发布请输入一位小数或整数---" << endl << endl;
+			return "";
 		}
+		try
+		{
+			if (Stock[0] < '1' || Stock[0]>'9') throw 1;
+			for (int i = 1; i < Stock.length(); i++)
+			{
+				if (Stock[i] < '0' || Stock[i]>'9')
+					throw 1;
+			}
+		}
+		catch (int)
+		{
+			cout << "---数量格式不正确，请输入正整数---" << endl << endl;
+			return "";
+		}
+		return "INSERT INTO commodity VALUES ( " + GoodName + " " + Price + " "
+			+ Stock + " " + Descrip + " )";
 	}
-	catch (int)
+	catch (double)
 	{
-		cout << "---数量格式不正确，请输入正整数---" << endl << endl;
-		return "";
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
-	return "INSERT INTO commodity VALUES ( " + GoodName + " " + Price + " "
-		+ Stock + " " + Descrip + " )";
 }
 
 string Users::CheckMyGood()
@@ -966,149 +1083,178 @@ string Users::CheckMyGood()
 }
 string Users::ChangeMyGood()
 {
-	string GoodId = "",Price="",Descrip="";
-	string in;
-	cout << "请输入被修改的商品的ID： "; cin >> GoodId;
-	Goods* allgood = Goods::GetInstance();
-	if (!allgood->CheckGoodId(GoodId))
-	{
-		cout << "商品ID不存在!" << endl << endl;
-		return "";
-	}
-	cout << "请输入被修改的商品的属性 （1.价格 2.描述): ";
-	cin >> in;
-	Goods* all = Goods::GetInstance();
 	try
 	{
-		if (in.length() != 1)
+		string GoodId = "", Price = "", Descrip = "";
+		string in;
+		cout << "请输入被修改的商品的ID： ";
+		getline(cin, GoodId);
+		if (GoodId.find(" ") != string::npos) throw 1.0;
+		Goods* allgood = Goods::GetInstance();
+		if (!allgood->CheckGoodId(GoodId))
 		{
-			throw 1;
+			cout << "商品ID不存在!" << endl << endl;
+			return "";
 		}
-		if (in[0] < '1' || in[0]>'2')
+		cout << "请输入被修改的商品的属性 （1.价格 2.描述): ";
+		getline(cin, in);
+		if (in.find(" ") != string::npos) throw 1.0;
+		Goods* all = Goods::GetInstance();
+		try
 		{
-			throw 1;
-		}
-		else
-		{
-			switch ((int)(in[0] - 48))
+			if (in.length() != 1)
 			{
-			case 1:
-				cout << "请输入被修改商品的价格: ";
-				cin>>Price;
-				try
+				throw 1;
+			}
+			if (in[0] < '1' || in[0]>'2')
+			{
+				throw 1;
+			}
+			else
+			{
+				switch ((int)(in[0] - 48))
 				{
-					if (Price[0] < '0' || Price[0]>'9') throw 1;
-					if (Price[0] == '0' && (Price[1] != '.')) throw 1;
-					for (int i = 1; i < Price.length(); i++)
+				case 1:
+					cout << "请输入被修改商品的价格: ";
+					getline(cin, Price);
+					if (Price.find(" ") != string::npos) throw 1.0;
+					try
 					{
-						if (Price[i] < '0' || Price[i]>'9')
+						if (Price[0] < '0' || Price[0]>'9') throw 1;
+						if (Price[0] == '0' && (Price[1] != '.')) throw 1;
+						for (int i = 1; i < Price.length(); i++)
 						{
-							if (Price[i] == '.')
+							if (Price[i] < '0' || Price[i]>'9')
 							{
-								if (i == Price.length() - 2 && (Price[i+1] >= '0' || Price[i+1] <= '9'))
+								if (Price[i] == '.')
 								{
-									break;
+									if (i == Price.length() - 2 && (Price[i + 1] >= '0' || Price[i + 1] <= '9'))
+									{
+										break;
+									}
+									else throw 1;
 								}
 								else throw 1;
 							}
-							else throw 1;
 						}
 					}
-				}
-				catch (int)
-				{
-					cout << "---价格格式不正确，已退出修改，正确修改请输入一位小数或整数---" << endl << endl;
-					return "";
-				}
-				cout << "请确认被修改的商品信息无误!" << endl;
-				
-				all->PrintWhenChange(GoodId,"Price",Price);
-				cout << "确认修改? (y/n)";
-				in.clear();
-				cin >> in;
-				if (in == "y")
-				{
-					return ("UPDATE commodity SET price = "+Price+" WHERE commodityID CONTAINS "+GoodId);
-				}
-				if (in == "n")
-				{
-					cout << "取消修改!" << endl << endl;
-					return"";
-				}
-				else
-				{
-					cout << "Invalid Input" << endl << endl;
-					return "";
-				}
-			case 2:
-				cout << "请输入被修改商品的描述: ";
-				cin>>Descrip;
-				if (Descrip.length() > 200)
-				{
-					cout << "----输入描述过长,已退出修改----" << endl << endl;
-					return "";
-				}
-				if (Descrip.find(",") != string::npos)
-				{
-					cout << "----不允许输入 \",\" 已退出修改----" << endl << endl;
-					return"";
-				}
-				else
-				{
+					catch (int)
+					{
+						cout << "---价格格式不正确，已退出修改，正确修改请输入一位小数或整数---" << endl << endl;
+						return "";
+					}
 					cout << "请确认被修改的商品信息无误!" << endl;
-					
-					all->PrintWhenChange(GoodId,"Descrip",Descrip);
+
+					all->PrintWhenChange(GoodId, "Price", Price);
 					cout << "确认修改? (y/n)";
 					in.clear();
-					cin >> in;
+					getline(cin, in);
+					if (in.find(" ") != string::npos) throw 1.0;
 					if (in == "y")
 					{
-						return "UPDATE commodity SET description = " + Descrip + " WHERE commodityID CONTAINS " + GoodId;
+						return ("UPDATE commodity SET price = " + Price + " WHERE commodityID CONTAINS " + GoodId);
 					}
+					if (in == "n")
+					{
+						cout << "取消修改!" << endl << endl;
+						return"";
+					}
+					else
+					{
+						cout << "Invalid Input" << endl << endl;
+						return "";
+					}
+				case 2:
+					cout << "请输入被修改商品的描述: ";
+					getline(cin, Descrip);
+					if (Descrip.length() > 200)
+					{
+						cout << "----输入描述过长,已退出修改----" << endl << endl;
+						return "";
+					}
+					if (Descrip.find(",") != string::npos)
+					{
+						cout << "----不允许输入 \",\" 已退出修改----" << endl << endl;
+						return"";
+					}
+					else
+					{
+						cout << "请确认被修改的商品信息无误!" << endl;
+
+						all->PrintWhenChange(GoodId, "Descrip", Descrip);
+						cout << "确认修改? (y/n)";
+						in.clear();
+						getline(cin, in);
+						if (in.find(" ") != string::npos) throw 1.0;
+						if (in == "y")
+						{
+							return "UPDATE commodity SET description = " + Descrip + " WHERE commodityID CONTAINS " + GoodId;
+						}
+					}
+					break;
 				}
-				break;
 			}
 		}
+		catch (int)
+		{
+			cout << "Invalid Input!" << endl << endl;
+		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+			return"";
+		}
 	}
-	catch (int)
+	catch (double)
 	{
-		cout << "Invalid Input!" << endl << endl;
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
 }
 
 string Users::RemoveMyGood()
 {
-	string Id="";
-	cout << "请输入要下架的商品ID: ";
-	cin >> Id;
-	Goods* allgood = Goods::GetInstance();
-	if (allgood->CheckGoodId(Id))
+	try
 	{
-		cout << "确认要下架该商品吗?" << endl;
-		allgood->PrintGoods("Seller", "Last","", Id);
-		cout << "请选择(y/n): ";
-		string in = "";
-		cin >> in;
-		if (in == "y")
+		string Id = "";
+		cout << "请输入要下架的商品ID: ";
+		getline(cin, Id);
+		if (Id.find(" ") != string::npos) throw 1.0;
+		Goods* allgood = Goods::GetInstance();
+		if (allgood->CheckGoodId(Id))
 		{
-			return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + Id;
+			cout << "确认要下架该商品吗?" << endl;
+			allgood->PrintGoods("Seller", "Last", "", Id);
+			cout << "请选择(y/n): ";
+			string in = "";
+			getline(cin, in);
+			if (in.find(" ") != string::npos) throw 1.0;
+			if (in == "y")
+			{
+				return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + Id;
+			}
+			if (in == "n")
+			{
+				cout << "取消下架" << endl << endl;
+				return "";
+			}
+			else
+			{
+				cout << "Invalid Input!" << endl << endl;
+				return "";
+			}
 		}
-		if (in == "n")
-		{
-			cout << "取消下架" << endl << endl;
-			return "";
-		}
-		else
-		{
-			cout << "Invalid Input!" << endl << endl;
-			return "";
-		}
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
 }
 
 string Users::CheckMyOrder()
 {
-	return " SELECT * FROM order";
+	return "SELECT * FROM order";
 }
 
 
@@ -1122,44 +1268,49 @@ void Users::UserBuyer()
 {
 	while (true)
 	{
-		cout << "===========================================================================================" << endl
-			<< "1.查看商品列表 2.购买商品 3.搜索商品 4.查看历史订单 5.查看商品详细信息 6.返回用户主界面" << endl
-			<< "===========================================================================================" << endl << endl;
-		cout << "请输入操作： ";
-		string in = "";
-		cin >> in;
-		try
-		{
-			if (in.length() > 1)
+			cout << "===========================================================================================" << endl
+				<< "1.查看商品列表 2.购买商品 3.搜索商品 4.查看历史订单 5.查看商品详细信息 6.返回用户主界面" << endl
+				<< "===========================================================================================" << endl << endl;
+			cout << "请输入操作： ";
+			string in = "";
+			getline(cin, in);
+			try
 			{
-				throw 1;
+				if (in.find(" ") != string::npos) throw 1.0;
+				if (in.length() > 1)
+				{
+					throw 1;
+				}
+				if (in[0] < '1' || in[0]>'6') throw 1;
+				switch ((int)(in[0] - 48))
+				{
+				case 1:
+					_CurrUser->SPAnaSQL(CheckGood());
+					break;
+				case 2:
+					_CurrUser->SPAnaSQL(BuyGood());
+					break;
+				case 3:
+					_CurrUser->SPAnaSQL(SearchGood());
+					break;
+				case 4:
+					_CurrUser->SPAnaSQL(CheckOrder());
+					break;
+				case 5:
+					_CurrUser->SPAnaSQL(CheckGoodAccura());
+					break;
+				case 6:
+					return;
+				}
 			}
-			if (in[0] < '1' || in[0]>'6') throw 1;
-			switch ((int)(in[0] - 48))
-			{
-			case 1:
-				_CurrUser->SPAnaSQL(CheckGood());
-				break;
-			case 2:
-				_CurrUser->SPAnaSQL(BuyGood());
-				break;
-			case 3:
-				break;
-				_CurrUser->SPAnaSQL(SearchGood());
-				break;
-			case 4:
-				_CurrUser->SPAnaSQL(CheckOrder());
-				break;
-			case 5:
-				_CurrUser->SPAnaSQL(CheckGoodAccura());
-				break;
-			case 6:
-				return;
-			}
-		}
 		catch (int)
 		{
 			cout << "Invalid Input!" << endl << endl;
+		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+			return;
 		}
 	}
 	return;
@@ -1171,52 +1322,79 @@ string Users::CheckGood()
 }
 string Users::BuyGood()
 {
-	string Id = "", Stock = "";
-	cout << "请输入商品 ID： "; cin >> Id;
-	Goods* allgood = Goods::GetInstance();
-	if (!allgood->CheckGoodId(Id))
-	{
-		cout << "商品ID不存在！" << endl << endl;
-		return"";
-	}
-	cin >> Stock;
 	try
 	{
-		if (Stock[0] < '1' || Stock[0]>'9') throw 1;
-		for (int i = 1; i < Stock.length(); i++)
+		string Id = "", Stock = "";
+		cout << "请输入商品 ID： ";
+		getline(cin, Id);
+		if (Id.find(" ") != string::npos) throw 1.0;
+		Goods* allgood = Goods::GetInstance();
+		if (!allgood->CheckGoodId(Id))
 		{
-			if (Stock[i] < '0' || Stock[i]>'9')
-				throw 1;
+			cout << "商品ID不存在！" << endl << endl;
+			return"";
 		}
+		cout << "请输入购买数量：";
+		getline(cin, Stock);
+		if (Stock.find(" ") != string::npos) throw 1.0;
+		try
+		{
+			if (Stock[0] < '1' || Stock[0]>'9') throw 1;
+			for (int i = 1; i < Stock.length(); i++)
+			{
+				if (Stock[i] < '0' || Stock[i]>'9')
+					throw 1;
+			}
+		}
+		catch (int)
+		{
+			cout << "---数量格式不正确，请输入正整数---" << endl << endl;
+			return "";
+		}
+		int integer = stoi(Stock);
+		if (integer > allgood->GetGoodStock(Id))
+		{
+			cout << "商品库存不足！" << endl << endl;
+			return"";
+		}
+		string _UpTime = "";
+		time_t rawtime;
+		struct tm* timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		_UpTime = to_string(timeinfo->tm_year + 1900) + "-";
+		if (timeinfo->tm_mon < 10) _UpTime += "0";
+		_UpTime += (to_string(timeinfo->tm_mon + 1) + "-");
+		if (timeinfo->tm_mday < 10) _UpTime += "0";
+		_UpTime += to_string(timeinfo->tm_mday);
+		Orders* allorder = Orders::GetInstance();
+		string OrderId = "T" + to_string(allorder->GetAll());
+		return "INSERT INTO order VALUES ( " + OrderId + "," + Id + "," + allgood->GetPrice(Id)
+			+ "," + Stock + "," + _UpTime + "," + allgood->GetSellerID(Id) + ","
+			+ _CurrUser->GetUserId() + " )";
 	}
-	catch (int)
+	catch (double)
 	{
-		cout << "---数量格式不正确，请输入正整数---" << endl << endl;
-		return "";
+		cout << "请不要输入空格！" << endl << endl;
+		return"";
 	}
-	string _UpTime ="";
-	time_t rawtime;
-	struct tm* timeinfo;
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-	_UpTime = to_string(timeinfo->tm_year + 1900) + "-";
-	if (timeinfo->tm_mon < 10) _UpTime += "0";
-	_UpTime += (to_string(timeinfo->tm_mon+1) + "-");
-	if (timeinfo->tm_mday < 10) _UpTime += "0";
-	_UpTime += to_string(timeinfo->tm_mday);
-	Orders* allorder = Orders::GetInstance();
-	string OrderId = "T" + to_string(allorder->GetAll());
-	return "INSERT INTO order VALUES ( " + OrderId + "," + Id + "," + allgood->GetPrice(Id)
-		+ "," + Stock + "," + _UpTime + "," + allgood->GetSellerID(Id) + ","
-		+ _CurrUser->GetUserId() + " )";
 }
 
 string Users::SearchGood()
 {
-	string Name;
-	cout << "请输入商品名称: ";
-	cin >> Name;
-	return "SELECT * FROM commodity WHERE commodityName  CONTAINS "+Name;
+	try
+	{
+		string Name;
+		cout << "请输入商品名称: ";
+		getline(cin, Name);
+		if (Name.find(" ") != string::npos) throw 1.0;
+		return "SELECT * FROM commodity WHERE commodityName  CONTAINS " + Name;
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl;
+		return "";
+	}
 }
 string Users::CheckOrder()
 {
@@ -1224,10 +1402,28 @@ string Users::CheckOrder()
 }
 string Users::CheckGoodAccura()
 {
-	cout << "请输入您想要查看的商品ID: ";
-	string Id="";
-	cin >> Id;
-	return "SELECT * FROM commodity WHERE commodityID CONTAINS "+Id;
+	try
+	{
+		cout << "请输入您想要查看的商品ID: ";
+		string Id = "";
+		getline(cin, Id);
+		if (Id.find(" ") != string::npos) throw 1.0;
+		Goods* allgood = Goods::GetInstance();
+		if (allgood->CheckGoodId(Id))
+		{
+			return "SELECT * FROM commodity WHERE commodityID CONTAINS " + Id;
+		}
+		else
+		{
+			cout << "商品ID不存在！" << endl;
+			return"";
+		}
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl;
+		return"";
+	}
 }
 
 void Users::Me()
@@ -1239,9 +1435,10 @@ void Users::Me()
 			<< "=================================================" << endl << endl;
 		cout << "请输入操作： ";
 		string in = "";
-		cin >> in;
+		getline(cin, in);
 		try
 		{
+			if (in.find(" ") != string::npos) throw 1.0;
 			if (in.length() > 1)
 			{
 				throw 1;
@@ -1266,6 +1463,10 @@ void Users::Me()
 		{
 			cout << "Invalid Input!" << endl << endl;
 		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+		}
 	}
 }
 
@@ -1273,9 +1474,10 @@ void Users::ChangeMe()
 {
 	string in;
 	cout << "请选择修改的属性 （1.用户名 2.联系方式 3.地址）：";
-	cin >> in;
+	getline(cin,in);
 	try
 	{
+		if (in.find(" ") != string::npos) throw 1.0;
 		if (in.length() > 1)
 		{
 			throw 1;
@@ -1289,8 +1491,12 @@ void Users::ChangeMe()
 			{
 				try
 				{
-					cout << "请输入修改后的用户名： " << endl;
-					cin >> aka;
+					cout << "请输入修改后的用户名： ";
+					getline(cin,aka);
+					if (aka.find(" ") != string::npos || aka.find(",") != string::npos)
+					{
+						throw 1.0;
+					}
 					for (map<string, User>::iterator it = AllUsers.begin(); it != AllUsers.end(); it++)
 					{
 						if (it->second.GetUserName() == aka)
@@ -1307,22 +1513,48 @@ void Users::ChangeMe()
 				{
 					cout << "用户名已存在，请重新输入" << endl;
 				}
+				catch (double)
+				{
+					cout << "请不要输入空格或者逗号！" << endl << endl;
+				}
 
 			}
 			break;
 		case 2:
 			cout << "请输入修改后的联系方式： ";
-			cin >> aka;
-			_CurrUser->ChangePhone(aka);
-			ResetDocuUser();
-			cout << "修改成功！" << endl << endl;
+			try {
+				getline(cin, aka);
+				if (aka.find(" ") != string::npos || aka.find(",") != string::npos)
+				{
+					throw 1;
+				}
+				_CurrUser->ChangePhone(aka);
+				ResetDocuUser();
+				cout << "修改成功！" << endl << endl;
+				break;
+			}
+			catch (int)
+			{
+				cout << "请不要输入空格或者逗号！" << endl << endl;
+			}
 			break;
 		case 3:
 			cout << "请输入修改后的地址： ";
-			cin >> aka;
-			_CurrUser->ChangeAddress(aka);
-			ResetDocuUser();
-			cout << "修改成功！" << endl << endl;
+			getline(cin, aka);
+			try {
+				if (aka.find(" ") != string::npos || aka.find(",") != string::npos)
+				{
+					throw 1;
+				}
+				_CurrUser->ChangeAddress(aka);
+				ResetDocuUser();
+				cout << "修改成功！" << endl << endl;
+				break;
+			}
+			catch (int)
+			{
+				cout << "请不要输入空格或者逗号！" << endl << endl;
+			}
 			break;
 		case 4:
 			return;
@@ -1332,6 +1564,10 @@ void Users::ChangeMe()
 	{
 		cout << "Invalid Input!" << endl << endl;
 	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl << endl;
+	}
 	return;
 }
 
@@ -1339,9 +1575,10 @@ void Users::AddMoney()
 {
 	cout << "请输入充值金额： ";
 	string Price= "";
-	cin >> Price;
+	getline(cin, Price);
 	try
 	{
+		if (Price.find(" ") != string::npos) throw 1.0;
 		if (Price[0] < '0' || Price[0]>'9') throw 1;
 		if (Price[0] == '0' && (Price[1] != '.')) throw 1;
 		for (int i = 1; i < Price.length(); i++)
@@ -1364,6 +1601,10 @@ void Users::AddMoney()
 	{
 		cout << "---金额不正确，充值失败，请输入一位小数或整数---" << endl << endl;
 		return ;
+	}
+	catch (double)
+	{
+		cout << "请不要输入空格！" << endl << endl;
 	}
 	_CurrUser->AddMoney(stod(Price));
 	ofstream out_file;

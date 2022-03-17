@@ -199,8 +199,8 @@ void Orders::ResetDocuOrder()
 		while (it != AllOrders.end())
 		{
 			out_file << it->second.OutInfo() << endl;
+			it++;
 		}
-		out_file << it->second.OutInfo();
 	}
 	out_file.close();
 	InputDocuOrder();
