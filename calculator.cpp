@@ -38,7 +38,6 @@ string calculator(string str)
         else if (isdigit(c) || (last_op == 3 && c == '-'))//是数字或者前一位是（并且本位是负号
         {
             last_op = 1;
-
             double x = 0;
             if (c == '-')
             {

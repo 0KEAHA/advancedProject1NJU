@@ -159,7 +159,7 @@ string Admin::DisableGood()
 			{
 				if (in2 == "y")
 				{
-					return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + in2;
+					return "UPDATE commodity SET state = removed WHERE commodityID CONTAINS " + in;
 				}
 				if (in2 == "n")
 				{
@@ -436,6 +436,16 @@ void User::CheckMyGood()
 	allgood->PrintGoods("Seller", "general", _UserId);
 	return;
 }
+bool User::CheckMyGoodId(string Id)
+{
+	Goods* AG = Goods::GetInstance();
+	if (AG->CheckGoodId(Id))
+	{
+		if (AG->GetSellerID(Id) == _UserId)
+			return 1;
+	}
+	return 0;
+}
 void User::ChangeMyGoodPrice(string Id, double price)
 {
 	Goods* allgood = Goods::GetInstance();
@@ -507,6 +517,7 @@ string User::GetMoney()
 	}
 	ans += "-";
 	map<string, string> consum;
+	map<string, string> get;
 	vector<string> Unit;
 	getline(in_file, tmp);
 	tmp.clear();
@@ -529,6 +540,10 @@ string User::GetMoney()
 		{
 			consum[Unit[3]] += (Unit[2]+" ");
 		}
+		if (Unit[5] == _UserId)
+		{
+			get[Unit[3]] += (Unit[2] + " ");
+		}
 		Unit.clear();
 	}
 	if (consum.empty())
@@ -537,11 +552,39 @@ string User::GetMoney()
 	}
 	else
 	{
+		string com = "(";
 		for (map<string, string>::iterator it = consum.begin(); it != consum.end(); it++)
 		{
+			string tmp = it->second;
 			string sa = "(";
 			string la = "";
-			for (size_t pos = it->second.find(" "); pos != string::npos; pos = it->second.find(" "))
+			for (size_t pos = tmp.find(" "); pos != string::npos; pos = tmp.find(" "))
+			{
+				for (int i = 0; i < pos; i++)
+				{
+					la.append(1, tmp[i]);
+				}
+				tmp.erase(0, pos + 1);
+				sa += (la + "+");
+			}
+			sa.pop_back();
+			sa += ")";
+			com += (it->first + "*" + sa+"+");
+		}
+		com.pop_back();
+		com += ")";
+		ans += com;
+	}
+	if (!get.empty())
+	{
+		ans += "+";
+		string coming = "(";
+		for (map<string, string>::iterator it = consum.begin(); it != consum.end(); it++)
+		{
+			string tmp = it->second;
+			string sa = "(";
+			string la = "";
+			for (size_t pos = tmp.find(" "); pos != string::npos; pos = tmp.find(" "))
 			{
 				for (int i = 0; i < pos; i++)
 				{
@@ -550,10 +593,12 @@ string User::GetMoney()
 				sa += (la + "+");
 			}
 			sa.pop_back();
-			sa += ")+";
-			ans += sa;
+			sa += ")";
+			coming += (it->first + "*" + sa + "+");
 		}
-		ans.pop_back();
+		coming.pop_back();
+		coming += ")";
+		ans += coming;
 	}
 	if (ans.empty()) return "0.0";
 	return calculator(ans);
@@ -747,10 +792,10 @@ void Users::AddUser()
 		string Pass = "";
 		cout << "请输入用户名： ";
 		getline(cin, UserId);
-		if (UserId.find(" ") != string::npos) throw 1.0;
+		if (UserId.find(" ") != string::npos|| UserId.find(",") != string::npos) throw 1.0;
 		cout << "请输入密码： "; 
 		getline(cin, Pass);
-		if (Pass.find(" ") != string::npos) throw 1.0;
+		if (Pass.find(" ") != string::npos|| Pass.find(",") != string::npos) throw 1.0;
 		if (CheckUserName(UserId))
 		{
 			cout << "----用户名已存在，退出注册----" << endl << endl;
@@ -767,7 +812,7 @@ void Users::AddUser()
 	}
 	catch (double)
 	{
-		cout << "请不要输入空格！" << endl << endl;
+		cout << "请不要输入空格或者逗号！" << endl << endl;
 		return;
 	}
 }
@@ -861,10 +906,8 @@ void Users::PrintUser(string commander, string Id)
 	}
 	else if (commander == "AdminDisable")
 	{
-		cout << "***************************************************************************************************" << endl;
-		cout << "用户ID\t用户名\t联系方式\t\t地址\t\t钱包余额" << endl;
 		AllUsers[Id].PrintUserDisable();
-		cout << "***************************************************************************************************" << endl;
+		
 		return;
 	}
 	else if (commander == "UserSelf")
@@ -1012,13 +1055,13 @@ string Users::AddGood()
 		string GoodName = "", Price = "", Stock = "", Descrip = "";
 		cout << "请输入商品名称： ";
 		getline(cin, GoodName);
-		if (GoodName.find(" ") != string::npos) throw 1.0;
+		if (GoodName.find(" ") != string::npos|| GoodName.find(",") != string::npos) throw 1.0;
 		cout << "请输入商品价格： ";
 		getline(cin, Price);
 		if (Price.find(" ") != string::npos) throw 1.0;
 		cout << "请输入商品数量： ";
 		getline(cin, Stock);
-		if (Stock.find(" ") != string::npos) throw 1.0;
+		if (Stock.find(" ") != string::npos|| Stock.find(",") != string::npos) throw 1.0;
 		cout << "请输入商品描述： "; 
 		getline(cin, Descrip);
 		string::iterator it;
@@ -1072,7 +1115,7 @@ string Users::AddGood()
 	}
 	catch (double)
 	{
-		cout << "请不要输入空格！" << endl << endl;
+		cout << "请不要输入空格或者逗号！" << endl << endl;
 		return"";
 	}
 }
@@ -1221,7 +1264,7 @@ string Users::RemoveMyGood()
 		getline(cin, Id);
 		if (Id.find(" ") != string::npos) throw 1.0;
 		Goods* allgood = Goods::GetInstance();
-		if (allgood->CheckGoodId(Id))
+		if (_CurrUser->CheckMyGoodId(Id))
 		{
 			cout << "确认要下架该商品吗?" << endl;
 			allgood->PrintGoods("Seller", "Last", "", Id);
@@ -1250,6 +1293,7 @@ string Users::RemoveMyGood()
 		cout << "请不要输入空格！" << endl << endl;
 		return"";
 	}
+	return"";
 }
 
 string Users::CheckMyOrder()

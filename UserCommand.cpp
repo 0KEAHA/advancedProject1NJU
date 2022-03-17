@@ -130,10 +130,10 @@ void Admin::AnaSQL(string command)
 					string ke = "";
 					for (int i = 0; i < pos; i++)
 					{
-						ke.append(1, Keep[i]);
+						ke.append(1, AKGood[i]);
 					}
 					UnitGood.push_back(ke);
-					Keep.erase(0, pos + 1);
+					AKGood.erase(0, pos + 1);
 					pos = AKGood.find(",");
 				}
 				if (!UnitGood.empty())

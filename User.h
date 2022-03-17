@@ -72,6 +72,7 @@ public:
 	void PrintUserSelf();
 
 	//Seller
+	bool CheckMyGoodId(string Id);
 	void AddGood(string,double,int ,string);
 	void CheckMyGood();
 	void ChangeMyGoodPrice(string,double);

@@ -254,8 +254,8 @@ void Orders::PrintOrders(string commander, string SellerId, string BuyerId)
 				if (it->second.GetSellerId() == SellerId)
 				{
 					it->second.PrintSeller();
-					it++;
 				}
+				it++;
 			}
 		}
 	}
@@ -270,8 +270,8 @@ void Orders::PrintOrders(string commander, string SellerId, string BuyerId)
 				if (it->second.GetBuyerId() == BuyerId)
 				{
 					it->second.PrintBuyer();
-					it++;
 				}
+				it++;
 			}
 		}
 	}

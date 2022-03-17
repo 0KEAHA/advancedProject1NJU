@@ -264,7 +264,7 @@ void Goods::InputDocuGood()
 		}
 		Unit.push_back(tmp);
 		tmp.clear();
-		AllGoods[Unit[0]] = Good(Unit[0],Unit[1],stod(Unit[2],0), stoi(Unit[3],0), Unit[4], Unit[5], Unit[6], Unit[7]);
+		AllGoods[Unit[0]] = Good(Unit[0],Unit[1],stod(Unit[2]), stoi(Unit[3]), Unit[4], Unit[5], Unit[6], Unit[7]);
 		Unit.clear();
 	}
 	if (in_file.eof())
@@ -371,7 +371,7 @@ void Goods::_SearchGood(string name, string commander)
 			{
 				if (it->second.GetName().find(name) != string::npos)
 				{
-					PrintGoods("Buyer", "specific", "", it->first);
+					PrintGoods("Buyer", "search", "", it->first);
 				}
 			}
 			it++;
@@ -384,7 +384,6 @@ void Goods::_SearchGood(string name, string commander)
 	cout << "****************************************************************" << endl;
 	return;
 }
-
 bool Goods::CheckGoodId(string Id)
 {
 	return !(AllGoods.find(Id) == AllGoods.end());
@@ -512,8 +511,8 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 						if (it->second.GetSellerId() == UserID)
 						{
 							it->second.PrintSeller();
-							it++;
 						}
+						it++;
 					}
 					break;
 				}
@@ -532,6 +531,10 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 					cout << "****************************************************************" << endl;
 					AllGoods[Id].PrintBuyerAccua();
 					break;
+				}
+				else if (Pattern == "search")
+				{
+					AllGoods[Id].PrintBuyer();
 				}
 				else if (Pattern == "general")
 				{
