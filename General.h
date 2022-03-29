@@ -6,7 +6,7 @@
 #include <vector>
 #include <ctime>
 #include <iomanip>
-#include<fstream>
+#include <fstream>
 #include <algorithm>
 #include <stack>
 #include <unordered_map>

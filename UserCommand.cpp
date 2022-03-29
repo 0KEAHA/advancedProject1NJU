@@ -143,7 +143,6 @@ void Admin::AnaSQL(string command)
 						_DisableGood(*it);
 					}
 				}
-				cout << "已封禁！" << endl << endl;
 				return;
 			}
 		}
@@ -367,12 +366,12 @@ void User::SPAnaSQL(string command)
 				BuyGood(po[0], po[1], po[2], po[3], po[4], po[5]);
 				UpCommand(command);
 				UpCommand("UPDATE commodity SET number = "+ po[3]+" WHERE commodityID CONTAINS "+ po[1]);
+				cout << po[1] + "购买成功!" << endl << endl;
 				Goods* Ag = Goods::GetInstance();
 				if (Ag->GetGoodStock(po[1]) == 0)
 				{
 					AnaSQL("UPDATE commodity SET state = removed WHERE commodityID CONTAINS "+ po[1]);
 				}
-				cout << "购买成功!" << endl << endl;
 				return;
 			}
 		}

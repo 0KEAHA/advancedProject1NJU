@@ -85,14 +85,14 @@ public:
 	string GetMoney();//计算器
 	void ChangeName(string);
 	void ChangePhone(string);
+	void ChangePass(string);
 	void ChangeAddress(string);
 	void AddMoney(double);
 	void BuyGood(string,string,string,string,string,string);//缺省买家ID
 	void SearchGood(string);
 	void CheckOrder();
 	void CheckGoodAccura(string);
-
-
+	
 	void AnaSQL(string);
 	void SPAnaSQL(string);
 };
@@ -103,7 +103,7 @@ private:
 	static Users* P_AllUsers;
 	User* _CurrUser;
 	map<string, User> AllUsers;
-	Users() {};
+	Users() { _CurrUser = nullptr; };
 public:
 	static Users* GetInstance();
 	void DeleteInstance();
@@ -113,6 +113,7 @@ public:
 	void InputDocuUser();
 	void ResetDocuUser();
 
+	User* GetPUser();
 	void AddUser();
 	void UserLogin();
 	void AfterLogin();
@@ -133,14 +134,14 @@ public:
 	string RemoveMyGood();
 	string CheckMyOrder();
 
-	void UserBuyer();//六个功能
+	void UserBuyer();//七个功能
 	
 	string CheckGood();
 	string BuyGood();
 	string SearchGood();
 	string CheckOrder();
 	string CheckGoodAccura();
-
+	
 	void Me();
 	void ChangeMe();
 	void AddMoney();

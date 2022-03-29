@@ -8,9 +8,11 @@ int main()
 	Goods* AG = Goods::GetInstance();
 	Users* AU = Users::GetInstance();
 	Orders* AO = Orders::GetInstance();
+	Carts* AC = Carts::GetInstance();
 	AU->InputDocuUser();
 	AG->InputDocuGood();
 	AO->InputDocuOrder();
+	AC->InputDocuCarts();
 	while (true)
 	{
 		string in = "";
@@ -50,6 +52,7 @@ int main()
 	AG->DeleteInstance();
 	AU->DeleteInstance();
 	AO->DeleteInstance();
+	AC->DeleteInstance();
 	return 0;
 }
 

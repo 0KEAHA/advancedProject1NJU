@@ -96,6 +96,10 @@ void Good::SellGood(int num)
 		Disable();*/
 	return;
 }
+void Good::ChangeStock(int stock)
+{
+	_Stock = stock;
+}
 void Good::changePrice(double Price)
 {
 	_Price = Price;
@@ -141,7 +145,6 @@ string Good::OutInfo()
 	string tmp = "";
 	string P=to_string(_Price);
 	P.erase(P.end() - 5, P.end());
-	P.pop_back();
 	tmp += (_Id + "," + _Name + "," + P + ","
 		+ to_string(_Stock) + "," + _Description + ","
 		+ _SellerId + "," + _UpTime + "," + TransAvail());
@@ -149,33 +152,40 @@ string Good::OutInfo()
 }
 void Good::LastPrint()
 {
-	cout << _Id << " " << _Name << " "
-		<< fixed << setprecision(1) << _Price << " "
+	cout << _Id << "\t"<< _Name << "\t"
+		<< fixed << setprecision(1) << _Price << "\t"
 		<< _UpTime << "\t" << _Stock<<  "\t"
 		<< _SellerId << "\t" << TransAvail()<<endl;
 	return;
 }
 void Good::PrintAdmin()
 {
-	cout << _Id << " " << _Name << " "
-		<< fixed << setprecision(1) << _Price << " "
+	cout << _Id << "\t" << _Name << "\t"
+		<< fixed << setprecision(1) << _Price << "\t"
 		<< _UpTime << "\t" << _SellerId << "\t"
 		<< _Stock << "\t" << TransAvail() << endl;;
 	return;
 }
 void Good::PrintSeller()
 {
-	cout << _Id << " " << _Name << " "
-		<< fixed << setprecision(1) << _Price << " "
+	cout << _Id << "\t" << _Name << "\t"
+		<< fixed << setprecision(1) << _Price << "\t"
 		<< _Stock << "\t" << _UpTime << "\t"
 		<< TransAvail()<<endl;
 	return;
 }
 void  Good::PrintBuyer()
 {
-	cout << _Id << " " << _Name << " " 
+	cout << _Id << "\t" << _Name << "\t" 
 		<< fixed << setprecision(1) << _Price
 		<< "\t" << _UpTime << "\t"<<_SellerId<<endl;
+	return;
+}
+void Good::PrintCart()
+{
+	cout << _Id << "\t" << _Name << "\t"
+		<< fixed << setprecision(1) << _Price
+		<< "\t" << _UpTime << "\t" << _SellerId<<"\t";
 	return;
 }
 void Good::PrintBuyerAccua()
@@ -234,12 +244,12 @@ void Goods::DeleteInstance()
 void Goods::InputDocuGood()
 {
 	ifstream in_file;
-	in_file.open("E:\\Project 1\\Project 1\\commodity.txt",
+	in_file.open("commodity.txt",
 		ios::in);
 	if (!in_file)
 	{
 		ofstream out_file;
-		out_file.open("E:\\Project 1\\Project 1\\commodity.txt",
+		out_file.open("commodity.txt",
 			ios::out);
 		out_file.close();
 		return;
@@ -280,7 +290,7 @@ void Goods::InputDocuGood()
 void Goods::ResetDocuGood()
 {
 	ofstream out_file;
-	out_file.open("E:\\Project 1\\Project 1\\commodity.txt", ios::out);
+	out_file.open("commodity.txt", ios::out);
 	if (out_file.fail())
 	{
 		cout << "Open commodity.txt to write Error!" << endl;
@@ -291,11 +301,14 @@ void Goods::ResetDocuGood()
 	{
 		out_file << endl;
 		map<string, Good>::iterator it = AllGoods.begin();
-		while (it != AllGoods.end())
+		auto mmm = AllGoods.end();
+		--mmm;
+		while (it != mmm)
 		{
 			out_file << it->second.OutInfo() << endl;
 			it++;
 		}
+		out_file << it->second.OutInfo();
 	}
 	out_file.close();
 	InputDocuGood();
@@ -319,6 +332,10 @@ void Goods::UpGood(string SellerId, string Name,
 
 
 //Ð¡ÐÍº¯Êý
+bool Goods::CheckAvailable(string Id)
+{
+	return AllGoods[Id].GetAvailable();
+}
 int Goods::GetGoodStock(string Id)
 {
 	return AllGoods[Id].GetStock();
@@ -352,7 +369,7 @@ void Goods::_SearchGood(string name, string commander)
 	cout << "****************************************************************" << endl;
 	if (commander == "Admin")
 	{
-		cout << "commodityID  commodityName\t   price\taddedDate\t sellerID\tnumber\tstate\n";
+		cout << "commodityID \tcommodityName\t price\taddedDate\t sellerID\tnumber\tstate\n";
 		while (it != AllGoods.end())
 		{
 			if (it->second.GetName().find(name) != string::npos)
@@ -364,7 +381,7 @@ void Goods::_SearchGood(string name, string commander)
 	}
 	else if (commander == "Buyer")
 	{
-		cout << "commodityID  commodityName\t   price\t addedDate\t  sellerID\n";
+		cout << "commodityID \tcommodityName\tprice\t addedDate\tsellerID\n";
 		while (it != AllGoods.end())
 		{
 			if (it->second.GetAvailable())
@@ -403,7 +420,12 @@ int Goods::GetAll()
 	}
 	return num;
 }
-
+void Goods::ChangeGoodStock(string Id, int stock)
+{
+	AllGoods[Id].ChangeStock(stock);
+	ResetDocuGood();
+	return;
+}
 void Goods::ChangeGoodPrice(string Id, double Price)
 {
 	AllGoods[Id].changePrice(Price);
@@ -423,6 +445,11 @@ void Goods::DisableGood(string Id)
 	return;
 }
 
+void Goods::PrintCart(string Id)
+{
+	AllGoods[Id].PrintCart();
+	return;
+}
 void Goods::PrintWhenChange(string Id,string Pattern,string content)
 {
 	if (Pattern == "Price")
@@ -441,7 +468,7 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 	if (Pattern == "Last")
 	{
 		cout << "****************************************************************" << endl;
-		cout << "commodityID  commodityName\t   price\taddedDate\t number\tsellerID\tstate\n";
+		cout << "commodityID \tcommodityName\t price\taddedDate\t number\tsellerID\tstate\n";
 		AllGoods[Id].LastPrint();
 		return;
 	}
@@ -467,8 +494,6 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 		switch (decision)
 		{
 		case 1:
-			cout << "****************************************************************" << endl;
-			cout << "commodityID  commodityName\t   price\taddedDate\t sellerID\tnumber\tstate\n";
 			if (AllGoods.empty() != true)
 			{
 				if (Pattern == "specific")
@@ -478,12 +503,14 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 				}
 				else if (Pattern == "general")
 				{
-					
+					cout << "****************************************************************" << endl;
+					cout << "commodityID \tcommodityName\t price\taddedDate\t sellerID\tnumber\tstate\n";
 					while (it != AllGoods.end())
 					{
 						it->second.PrintAdmin();
 						it++;
 					}
+					cout << "****************************************************************" << endl<<endl;
 					break;
 				}
 				else
@@ -494,8 +521,6 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 			}
 			break;
 		case 2:
-			cout << "****************************************************************" << endl;
-			cout << "commodityID  commodityName\t   price\tnumber\t addedDate\t  state\n";
 			if (AllGoods.empty() != true)
 			{
 				if (Pattern == "specific")
@@ -506,6 +531,8 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 
 				else if (Pattern == "general")
 				{
+					cout << "****************************************************************" << endl;
+					cout << "commodityID \tcommodityName\t   price\tnumber\t addedDate\t  state\n";
 					while (it != AllGoods.end())
 					{
 						if (it->second.GetSellerId() == UserID)
@@ -514,6 +541,7 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 						}
 						it++;
 					}
+					cout << "****************************************************************" << endl << endl;
 					break;
 				}
 				else
@@ -530,6 +558,7 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 				{
 					cout << "****************************************************************" << endl;
 					AllGoods[Id].PrintBuyerAccua();
+					cout << "****************************************************************" << endl << endl;
 					break;
 				}
 				else if (Pattern == "search")
@@ -539,7 +568,7 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 				else if (Pattern == "general")
 				{
 					cout << "****************************************************************" << endl;
-					cout << "commodityID  commodityName\t   price\t addedDate\t  sellerID\n";
+					cout << "commodityID \tcommodityName\t   price\t addedDate\t  sellerID\n";
 					while (it != AllGoods.end())
 					{
 						if (it->second.GetAvailable())
@@ -548,12 +577,14 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 						}
 						it++;
 					}
+					cout << "****************************************************************" << endl;
 					break;
 				}
 				else if (Pattern == "Accura")
 				{
 					cout << "****************************************************************" << endl;
 					AllGoods[Id].PrintBuyerAccua();
+					cout << "****************************************************************" << endl;
 					break;
 				}
 				else
@@ -564,6 +595,5 @@ void Goods::PrintGoods(string Commander, string Pattern, string UserID , string 
 			}
 			break;
 		}
-	cout << "****************************************************************" << endl;
 	return;
 }

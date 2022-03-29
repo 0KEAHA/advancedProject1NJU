@@ -26,6 +26,7 @@ public:
 	Good(const Good&);
 	void SellGood(int);
 	void changePrice(double);
+	void ChangeStock(int);
 	void changeDescrip(string);
 	void Disable();
 	bool GetAvailable();
@@ -37,11 +38,13 @@ public:
 	void PrintAdmin();
 	void PrintSeller();
 	void PrintBuyer();
+	void PrintCart();
 	void LastPrint();
 	void PrintBuyerAccua();
 	void PrintWhenChangePri(string content);
 	void PrintWhenChangeDes(string content);
 	Good& operator=(const Good&);
+
 };
 
 class Goods
@@ -58,12 +61,14 @@ public:
 	void InputDocuGood();
 	//void ChangeGoodName(string,string);
 	bool CheckGoodId(string);
+	bool CheckAvailable(string Id);
 	int GetGoodStock(string Id);
 	string GetBySeller(string SellerId);
 	string GetSellerID(string Id);
 	string GetPrice(string Id);
 	void SellGood(string,int);
 	void ChangeGoodPrice(string, double);
+	void ChangeGoodStock(string, int);
 	void ChangeGoodDescrip(string, string);
 	void DisableGood(string);
 	/*bool CheckGoodName(string);*/
@@ -77,6 +82,7 @@ public:
 	general为所有有权查看商品
 	Accura为用户查看详细信息
 	*/
+	void PrintCart(string Id);
 	void PrintWhenChange(string ID,string Pattern,string content);
 	void PrintGoods(string, string, string UserID = "", string Id = "");
 	void _SearchGood(string name, string commander);

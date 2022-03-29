@@ -137,12 +137,12 @@ void Orders::DeleteInstance()
 void Orders::InputDocuOrder()
 {
 	ifstream in_file;
-	in_file.open("E:\\Project 1\\Project 1\\order.txt",
+	in_file.open("order.txt",
 		ios::in);
 	if (!in_file)
 	{
 		ofstream out_file;
-		out_file.open("E:\\Project 1\\Project 1\\order.txt",
+		out_file.open("order.txt",
 			ios::out);
 		out_file.close();
 		return;
@@ -184,7 +184,7 @@ void Orders::InputDocuOrder()
 void Orders::ResetDocuOrder()
 {
 	ofstream out_file;
-	out_file.open("E:\\Project 1\\Project 1\\order.txt",
+	out_file.open("order.txt",
 		ios::out);
 	if (out_file.fail())
 	{
@@ -196,11 +196,14 @@ void Orders::ResetDocuOrder()
 	{
 		out_file << endl;
 		map<string, Order>::iterator it = AllOrders.begin();
-		while (it != AllOrders.end())
+		auto mmm = AllOrders.end();
+		--mmm;
+		while (it != mmm)
 		{
 			out_file << it->second.OutInfo() << endl;
 			it++;
 		}
+		out_file << it->second.OutInfo();
 	}
 	out_file.close();
 	InputDocuOrder();
