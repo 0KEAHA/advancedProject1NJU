@@ -495,6 +495,8 @@ string User::GetMoney()
 	string ans = "";
 	string tmp = "";
 	getline(in_file, tmp);
+	tmp.clear();
+	getline(in_file, tmp);
 	if (tmp.empty()) return "0.0";
 	do
 	{
@@ -1814,7 +1816,7 @@ void Users::AddMoney()
 	_CurrUser->AddMoney(stod(Price));
 	ofstream out_file;
 	out_file.open("recharge.txt", ios::app);
-	out_file << _CurrUser->GetUserId() << " " << Price<<" " << endl;
+	out_file << endl<< _CurrUser->GetUserId() << " " << Price<<" " ;
 	cout << "充值成功，当前余额： " << _CurrUser->GetMoney() << endl;
 	ResetDocuUser();
 	return;
