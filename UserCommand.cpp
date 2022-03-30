@@ -258,12 +258,12 @@ void User::AnaSQL(string command)
 		}
 	}
 }
-void User::SPAnaSQL(string command)
+int User::SPAnaSQL(string command)
 {
 	string Keep = command;
 	if (Keep.empty())
 	{
-		return;
+		return  0;
 	}
 	else
 	{
@@ -293,25 +293,25 @@ void User::SPAnaSQL(string command)
 				{
 					UpCommand(command);
 					CheckGood();
-					return;
+					return 1;
 				}
 				it += 2;
 				if (*it == "commodityID")
 				{
 					UpCommand(command);
 					CheckGoodAccura(*(UnitCommand.end() - 1));
-					return;
+					return 1;
 				}
 				if (*it == "commodityName")
 				{
 					UpCommand(command);
 					SearchGood(*(UnitCommand.end() - 1));
-					return;
+					return 1;
 				}
 				else
 				{
 					cout << "The select command Buyer is Wrong!" << endl << endl;
-					return;
+					return 0;
 				}
 			}
 			if (*it == "order")
@@ -321,18 +321,18 @@ void User::SPAnaSQL(string command)
 				{
 					UpCommand(command);
 					CheckOrder();
-					return;
+					return 1;
 				}
 				else
 				{
 					cout << "The Buyer Select Buyer is Wrong!" << endl << endl;
-					return;
+					return 0;
 				}
 			}
 			else
 			{
 				cout << "Buyer Select Buyer is Wrong!" << endl << endl;
-				return;
+				return 0;
 			}
 		}
 		else if (*it == "INSERT")
@@ -359,7 +359,7 @@ void User::SPAnaSQL(string command)
 			if (balance < stod(calculator(po[2] + "*" + po[3])))
 			{
 				cout << "对不起，您的余额不足，请充值！" << endl << endl;
-				return;
+				return 0;
 			}
 			else
 			{
@@ -372,7 +372,7 @@ void User::SPAnaSQL(string command)
 				{
 					AnaSQL("UPDATE commodity SET state = removed WHERE commodityID CONTAINS "+ po[1]);
 				}
-				return;
+				return 1;
 			}
 		}
 	}

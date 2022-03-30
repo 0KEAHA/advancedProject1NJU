@@ -94,7 +94,7 @@ public:
 	void CheckGoodAccura(string);
 	
 	void AnaSQL(string);
-	void SPAnaSQL(string);
+	int SPAnaSQL(string);
 };
 
 class Users

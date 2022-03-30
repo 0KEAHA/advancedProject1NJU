@@ -59,6 +59,7 @@ void Cart::BuyAll()
 	Goods* AllGood = Goods::GetInstance();
 	for (auto it = _UnitCommdity.begin(); it != _UnitCommdity.end(); it++)
 	{
+		cout << "商品" << it->first <<"购买中……" << endl;
 		if (AllGood->CheckAvailable(it->first) && AllGood->GetGoodStock(it->first)>=it->second)
 		{
 			string _UpTime = "";
@@ -80,11 +81,20 @@ void Cart::BuyAll()
 				k %= i;
 			}
 			string OrderId = "T" + tp;
-			(AllUser->GetPUser())
+			if ((AllUser->GetPUser())
 				->SPAnaSQL(
 					"INSERT INTO order VALUES ( " + OrderId + "," + it->first + "," + AllGood->GetPrice(it->first)
-				+ "," + to_string(it->second) + "," + _UpTime + "," + AllGood->GetSellerID(it->first) + ","
-				+ _UserId + " )");
+					+ "," + to_string(it->second) + "," + _UpTime + "," + AllGood->GetSellerID(it->first) + ","
+					+ _UserId + " )"))
+			{
+				cout << "商品" << it->first << "购买成功！" << endl;
+				DeletSome(it->first);
+				cout << "商品" << it->first << "已从购物车中移除！" << endl;
+			}
+			else
+			{
+				cout << "余额不足！商品" << it->first << "购买失败！" << endl;
+			};
 			continue;
 		}
 		else
@@ -92,8 +102,7 @@ void Cart::BuyAll()
 			cout << "商品" << it->first << "已下架或库存不足!" << endl;
 		}
 	}
-	cout << "除失效商品、库存不足商品外，全部商品已购买!\n购物车已清空！" << endl << endl;
-	Erase();
+	cout << "除失效商品、库存不足商品、余额不足外，全部商品已购买!" << endl << endl;
 	return;
 }
 void Cart::ClearDis()
@@ -126,7 +135,6 @@ void Cart::DeletSome(string Id)
 			break;
 		}
 	}
-	cout << "该商品已从购物车移除" << endl<<endl;
 	return;
 }
 void Cart::ShowAll()
@@ -137,6 +145,7 @@ void Cart::ShowAll()
 	{
 		AllGood->PrintCart(it->first); cout << it->second << endl;;
 	}
+	cout << endl;
 	return;
 }
 bool Cart::CheckId(string Id)

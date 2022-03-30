@@ -1480,7 +1480,7 @@ string Users::BuyGood()
 		getline(cin, Id);
 		if (Id.find(" ") != string::npos) throw 1.0;
 		Goods* allgood = Goods::GetInstance();
-		if (!allgood->CheckGoodId(Id))
+		if (!allgood->CheckGoodId(Id)||!allgood->CheckAvailable(Id))
 		{
 			cout << "商品ID不存在！" << endl << endl;
 			return"";
