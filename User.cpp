@@ -658,6 +658,7 @@ void User::BuyGood(string OrderId, string GoodId, string Price, string Num, stri
 	allorder->UpOrder(OrderId, GoodId, Price, Num, Date, SellerId, _UserId);
 	Goods* allgood = Goods::GetInstance();
 	allgood->SellGood(GoodId, stoi(Num));
+	_Money -= stoi(Num) * stod(Price);
 	return;
 }
 void User::SearchGood(string name)
@@ -1651,10 +1652,22 @@ void Users::ChangeMe()
 				try
 				{
 					cout << "请输入修改后的用户名： ";
+					aka.clear();
 					getline(cin,aka);
 					if (aka.find(" ") != string::npos || aka.find(",") != string::npos)
 					{
 						throw 1.0;
+					}
+					if (aka.length() > 10)
+					{
+						cout << "用户名过长！请小于十一个字母！" << endl << endl; continue;
+					}
+					for (string::iterator it = aka.begin(); it != aka.end(); it++)
+					{
+						if (*it < 'A' || *it>'z' || (*it > 'Z' && *it < 'a')) {
+							cout << "----请输入英文字母！----" << endl << endl;
+							continue;
+						}
 					}
 					for (map<string, User>::iterator it = AllUsers.begin(); it != AllUsers.end(); it++)
 					{
@@ -1663,20 +1676,41 @@ void Users::ChangeMe()
 							throw 1;
 						}
 					}
-					_CurrUser->ChangeName(aka);
-					ResetDocuUser();
-					cout << "修改成功！" << endl << endl;
-					break;
+					cout << "确认修改？[y/n]";
+					in.clear();
+					getline(cin, in);
+					if (in == "y")
+					{
+						string tmp = _CurrUser->GetUserName();
+						_CurrUser->ChangeName(aka);
+						AllUsers[aka] = *_CurrUser;
+						AllUsers.erase(tmp);
+						tmp.clear();
+						ResetDocuUser();
+						cout << "----修改成功！----" << endl << endl;
+						break;
+					}
+					else if (in == "n")
+					{
+						cout << "----修改取消----" << endl << endl;
+						return;
+					}
+					else
+					{
+						cout << "----输入无效，请重新修改----" << endl;
+						continue;
+					}
 				}
 				catch (int)
 				{
 					cout << "用户名已存在，请重新输入" << endl;
+					continue;
 				}
 				catch (double)
 				{
 					cout << "请不要输入空格或者逗号！" << endl << endl;
+					continue;
 				}
-
 			}
 			break;
 		case 2:
@@ -1687,9 +1721,39 @@ void Users::ChangeMe()
 				{
 					throw 1;
 				}
-				_CurrUser->ChangePhone(aka);
-				ResetDocuUser();
-				cout << "修改成功！" << endl << endl;
+				if (aka.length() > 20)
+				{
+					cout << "请输入20位及以内的联系方式！" << endl << endl;
+					return;
+				}
+				for (int i = 0; i < aka.length(); i++)
+				{
+					if (aka[i] < '0' || aka[i]>'9')
+					{
+						cout << "请输入数字" << endl << endl;
+						return;
+					}
+				}
+				cout << "确认修改？[y/n]";
+				in.clear();
+				getline(cin, in);
+				if (in == "y")
+				{
+					_CurrUser->ChangePhone(aka);
+					ResetDocuUser();
+					cout << "修改成功！" << endl << endl;
+					break;
+				}
+				else if (in == "n")
+				{
+					cout << "----修改取消----" << endl << endl;
+					return;
+				}
+				else
+				{
+					cout << "----输入无效，请重新修改----" << endl;
+					return;
+				}
 				break;
 			}
 			catch (int)
@@ -1701,7 +1765,7 @@ void Users::ChangeMe()
 			cout << "请输入修改后的地址： ";
 			getline(cin, aka);
 			try {
-				if (aka.find(" ") != string::npos || aka.find(",") != string::npos)
+				if (aka.find(",") != string::npos)
 				{
 					throw 1;
 				}
@@ -1713,9 +1777,29 @@ void Users::ChangeMe()
 						return;
 					}
 				}
-				_CurrUser->ChangeAddress(aka);
-				ResetDocuUser();
-				cout << "修改成功！" << endl << endl;
+				for (int i = 0; i < aka.length(); i++)
+				{
+					if (aka[i] < '0' || aka[i]>'9')
+					{
+						cout << "请输入数字" << endl << endl;
+						return;
+					}
+				}
+				cout << "确认修改？[y/n]";
+				in.clear();
+				getline(cin, in);
+				if (in == "y")
+				{
+					_CurrUser->ChangeAddress(aka);
+					ResetDocuUser();
+					cout << "修改成功！" << endl << endl;
+					break;
+				}
+				else if (in == "n")
+				{
+					cout << "----修改取消----" << endl << endl;
+					return;
+				}
 				break;
 			}
 			catch (int)
@@ -1733,6 +1817,19 @@ void Users::ChangeMe()
 					cout << "请输入新密码：";
 					pa.clear();
 					getline(cin, pa);
+					for (string::iterator it = pa.begin(); it != pa.end(); it++)
+					{
+						if ((*it < 'a' && (*it < '0' || *it>'9')) || *it > 'z')
+						{
+							cout << "----请输入小写字母或数字！已退出修改----" << endl << endl;
+							return;
+						}
+					}
+					if (pa.length() > 20)
+					{
+						cout << "----密码长度不应超过20位!已退出修改----" << endl << endl;
+						return;
+					}
 					if (_CurrUser->CheckPass(pa))
 					{
 						cout << "新密码不得与原密码相同！" << endl;
@@ -1741,13 +1838,26 @@ void Users::ChangeMe()
 					else
 					{
 						string newpa;
-						cout << "请再次输入新密码：" << endl;
+						cout << "请再次输入新密码：";
 						getline(cin, newpa);
 						if (newpa == pa)
 						{
-							_CurrUser->ChangePass(pa);
-							ResetDocuUser();
-							cout << "修改成功！" << endl << endl;
+
+							cout << "确认修改？[y/n]";
+							in.clear();
+							getline(cin, in);
+							if (in == "y")
+							{
+								_CurrUser->ChangePass(pa);
+								ResetDocuUser();
+								cout << "修改成功！" << endl << endl;
+								break;
+							}
+							else if (in == "n")
+							{
+								cout << "----修改取消----" << endl << endl;
+								break;
+							}
 							break;
 						}
 						else
@@ -1813,11 +1923,26 @@ void Users::AddMoney()
 	{
 		cout << "请不要输入空格！" << endl << endl;
 	}
-	_CurrUser->AddMoney(stod(Price));
-	ofstream out_file;
-	out_file.open("recharge.txt", ios::app);
-	out_file << endl<< _CurrUser->GetUserId() << " " << Price<<" " ;
-	cout << "充值成功，当前余额： " << _CurrUser->GetMoney() << endl;
-	ResetDocuUser();
+	cout << "确认充值？[y/n]";
+	string in = "";
+	getline(cin, in);
+	if (in == "y")
+	{
+		_CurrUser->AddMoney(stod(Price));
+		ofstream out_file;
+		out_file.open("recharge.txt", ios::app);
+		out_file << endl << _CurrUser->GetUserId() << " " << Price << " ";
+		out_file.close();
+		cout << "充值成功，当前余额： " << _CurrUser->GetMoney() << endl;
+		ResetDocuUser();
+	}
+	else if (in == "n")
+	{
+		cout<<"充值取消，当前余额："<< _CurrUser->GetMoney() << endl<<endl;
+	}
+	else
+	{
+		cout<<"输入不合法，充值取消，当前余额： " << _CurrUser->GetMoney() << endl << endl;
+	}
 	return;
 }
