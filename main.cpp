@@ -15,8 +15,9 @@ int main()
 	{
 		string in = "";
 		InitialPrint();
-		cin >> in;
+		getline(cin, in);
 		try {
+			if (in.find(" ") != string::npos) throw 1.0;
 			if (in.length() != 1)
 				throw 1;
 			if (in[0] < 49 || in[0]>52)
@@ -36,11 +37,19 @@ int main()
 				return 0;
 			}
 		}
+		catch (double)
+		{
+			cout << "请不要输入空格！" << endl << endl;
+		}
 		catch (int)
 		{
 			cout << "Invalid Input!" << endl << endl;
 		}
 	}
+	Ad->DeleteInstance();
+	AG->DeleteInstance();
+	AU->DeleteInstance();
+	AO->DeleteInstance();
 	return 0;
 }
 

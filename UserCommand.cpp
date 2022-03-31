@@ -130,10 +130,10 @@ void Admin::AnaSQL(string command)
 					string ke = "";
 					for (int i = 0; i < pos; i++)
 					{
-						ke.append(1, Keep[i]);
+						ke.append(1, AKGood[i]);
 					}
 					UnitGood.push_back(ke);
-					Keep.erase(0, pos + 1);
+					AKGood.erase(0, pos + 1);
 					pos = AKGood.find(",");
 				}
 				if (!UnitGood.empty())
@@ -202,7 +202,14 @@ void User::AnaSQL(string command)
 		else if (*it == "INSERT")
 		{
 			it += 5;
-			AddGood(*it, stod(it[1]), stoi(it[2]), it[3]);
+			string des = "";
+			vector<string>::iterator keep = it;
+			++++++it;
+			for (; it != UnitCommand.end() - 1; it++)
+			{
+				des += *it;
+			}
+			AddGood(*keep, stod(keep[1]), stoi(keep[2]), des);
 			UpCommand(command);
 			return;
 		}
@@ -224,7 +231,9 @@ void User::AnaSQL(string command)
 				for (; it != UnitCommand.end() - 4; it++)
 				{
 					des += *it;
+					des += " ";
 				}
+				des.pop_back();
 				ChangeMyGoodDescrip(*(UnitCommand.end()-1),des);
 				UpCommand(command);
 				cout << "修改成功！" << endl << endl;
@@ -330,21 +339,38 @@ void User::SPAnaSQL(string command)
 		else if (*it == "INSERT")
 		{
 			it += 5;
+			string tmp = *it;
+			vector<string> UnitPara;
+			string::size_type pos = tmp.find(",");
+			while (pos != string::npos)
+			{
+				string ke = "";
+				for (int i = 0; i < pos; i++)
+				{
+					ke.append(1, tmp[i]);
+				}
+				UnitPara.push_back(ke);
+				tmp.erase(0, pos + 1);
+				pos = tmp.find(",");
+			}
+			UnitPara.push_back(tmp);
+			tmp.clear();
+			vector<string>::iterator po = UnitPara.begin();
 			double balance = stod(GetMoney());
-			if (balance < stod(calculator(it[2] + "*" + it[3])))
+			if (balance < stod(calculator(po[2] + "*" + po[3])))
 			{
 				cout << "对不起，您的余额不足，请充值！" << endl << endl;
 				return;
 			}
 			else
 			{
-				BuyGood(it[0], it[1], it[2], it[3], it[4], it[5]);
+				BuyGood(po[0], po[1], po[2], po[3], po[4], po[5]);
 				UpCommand(command);
-				UpCommand("UPDATE commodity SET number = "+it[3]+" WHERE commodityID CONTAINS "+it[1]);
+				UpCommand("UPDATE commodity SET number = "+ po[3]+" WHERE commodityID CONTAINS "+ po[1]);
 				Goods* Ag = Goods::GetInstance();
-				if (Ag->GetGoodStock(it[1]) == 0)
+				if (Ag->GetGoodStock(po[1]) == 0)
 				{
-					AnaSQL("UPDATE commodity SET state = removed WHERE commodityID CONTAINS "+it[1]);
+					AnaSQL("UPDATE commodity SET state = removed WHERE commodityID CONTAINS "+ po[1]);
 				}
 				cout << "购买成功!" << endl << endl;
 				return;

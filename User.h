@@ -60,6 +60,7 @@ public:
 	//文件生成用户
 	User(string Id, string name, string password, string phone, string address, string balance, string state);
 	
+	User& operator=(const User&);
 	string GetUserName();
 	string GetUserId();
 	string GetUserState();
@@ -71,6 +72,7 @@ public:
 	void PrintUserSelf();
 
 	//Seller
+	bool CheckMyGoodId(string Id);
 	void AddGood(string,double,int ,string);
 	void CheckMyGood();
 	void ChangeMyGoodPrice(string,double);
@@ -101,6 +103,7 @@ private:
 	static Users* P_AllUsers;
 	User* _CurrUser;
 	map<string, User> AllUsers;
+	Users() {};
 public:
 	static Users* GetInstance();
 	void DeleteInstance();
